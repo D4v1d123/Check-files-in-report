@@ -66,7 +66,9 @@ def check_duplicate_items(list):
         seen.add(item)
     return duplicates
 
-def check_files_in_report(spreadsheet_path, files_path): 
+def check_files_in_report(spreadsheet_path, sheet_name, 
+                          patients_column, study_column, 
+                          files_path):
     study_patients_folder = []
     study_patients_sheet = []
 
@@ -92,12 +94,12 @@ def check_files_in_report(spreadsheet_path, files_path):
 
     # Extract data from spreadsheet.
     spreadsheet = load_workbook(spreadsheet_path)
-    sheet = spreadsheet['Hoja1']
+    sheet = spreadsheet[sheet_name]
     green = '92d050'
 
-    for i in range(2, (len(sheet["D"]) + 1)):
-        sheet_study = remove_accents(sheet[f"K{i}"].value)
-        sheet_patient = remove_accents(sheet[f"D{i}"].value)
+    for i in range(2, (len(sheet[patients_column]) + 1)):
+        sheet_study = remove_accents(sheet[f'{study_column}{i}'].value)
+        sheet_patient = remove_accents(sheet[f'{patients_column}{i}'].value)
         patient_info = f"{sheet_patient.strip()} _ {sheet_study.strip()}".lower()
         
         study_patients_sheet.append(patient_info)
@@ -109,13 +111,13 @@ def check_files_in_report(spreadsheet_path, files_path):
 
     # Highlight patients cell who have PDF in folder. 
     i, j = 0, 2
-    while (i < len(files_in_report)) and (j < (len(sheet['D']) + 1)):
-        cell_study = remove_accents(sheet[f'K{j}'].value)
-        cell_patient = remove_accents(sheet[f'D{j}'].value)
+    while (i < len(files_in_report)) and (j < (len(sheet[patients_column]) + 1)):
+        cell_study = remove_accents(sheet[f'{study_column}{j}'].value)
+        cell_patient = remove_accents(sheet[f'{patients_column}{j}'].value)
         patient_info = f'{cell_patient.strip()} _ {cell_study.strip()}'.lower()
     
         if files_in_report[i] == patient_info:
-            change_background_color(sheet[f'D{j}'], green)
+            change_background_color(sheet[f'{patients_column}{j}'], green)
             i += 1
             j += 1
         else:
@@ -147,5 +149,10 @@ def check_files_in_report(spreadsheet_path, files_path):
 # File directory.
 files_path = r'D:\Users\User\Documents\PDF'
 spreadsheet_path = r'D:\Users\User\Documents\TRAZABILIDAD.xlsx'
+patients_column = "D"
+study_column = "K"
+sheet_name = "Hoja1"
 
-check_files_in_report(spreadsheet_path, files_path)
+check_files_in_report(spreadsheet_path, sheet_name, 
+                      patients_column, study_column, 
+                      files_path)
