@@ -66,9 +66,9 @@ def check_duplicate_items(list):
         seen.add(item)
     return duplicates
 
-def check_files_in_report(spreadsheet_path, sheet_name, 
+def check_files_in_report(spreadsheet_path, sheet, 
                           patients_column, study_column, 
-                          files_path):
+                          files_path, invalid_files_path): 
     study_patients_folder = []
     study_patients_sheet = []
 
@@ -80,10 +80,8 @@ def check_files_in_report(spreadsheet_path, sheet_name,
 
             # Move files with invalid format.
             if file_study == ValueError:
-                folder = r'D:\Users\User\Documents\Archivos con formato inválido'
-
-                os.makedirs(folder, exist_ok=True)
-                shutil.move(file_path, folder)
+                os.makedirs(invalid_files_path, exist_ok=True)
+                shutil.move(file_path, invalid_files_path)
             else: 
                 file_patient = remove_accents(file_patient)
                 file_study = remove_accents(file_study)
@@ -94,23 +92,27 @@ def check_files_in_report(spreadsheet_path, sheet_name,
 
     # Extract data from spreadsheet.
     spreadsheet = load_workbook(spreadsheet_path)
-    sheet = spreadsheet[sheet_name]
+    sheet = spreadsheet[sheet]
     green = '92d050'
 
+    #TEST
     for i in range(2, (len(sheet[patients_column]) + 1)):
         sheet_study = remove_accents(sheet[f'{study_column}{i}'].value)
         sheet_patient = remove_accents(sheet[f'{patients_column}{i}'].value)
-        patient_info = f"{sheet_patient.strip()} _ {sheet_study.strip()}".lower()
-        
-        study_patients_sheet.append(patient_info)
 
-    locale.setlocale(locale.LC_ALL, 'Spanish_Spain.1252')
+        # Normalizar o sanatizar datos.
+        patient_info = f"{sheet_patient.strip()} _ {sheet_study.strip()}".lower()
+        study_patients_sheet.append(patient_info)
+    # TEST
+
     files_in_report = set(study_patients_folder).intersection(set(study_patients_sheet))
+    locale.setlocale(locale.LC_ALL, 'Spanish_Spain.1252')
     files_in_report = sorted(list(files_in_report), key=locale.strxfrm)
 
-
+    i = 0
+    j = 2
+    
     # Highlight patients cell who have PDF in folder. 
-    i, j = 0, 2
     while (i < len(files_in_report)) and (j < (len(sheet[patients_column]) + 1)):
         cell_study = remove_accents(sheet[f'{study_column}{j}'].value)
         cell_patient = remove_accents(sheet[f'{patients_column}{j}'].value)
@@ -126,9 +128,9 @@ def check_files_in_report(spreadsheet_path, sheet_name,
     try:
         spreadsheet.save(spreadsheet_path)
     except PermissionError:
-        print('The changes to the spreadsheet could not be saved because it is open \
+        print('The chages to the spreadsheet could not be saved because it is open \
               by another program!!!.\n')
- 
+
     study_patients_dups_sheet = check_duplicate_items(study_patients_sheet)
     study_patients_dups_folder = check_duplicate_items(study_patients_folder)
     files_out_report = set(study_patients_folder).difference(set(study_patients_sheet))
@@ -149,10 +151,11 @@ def check_files_in_report(spreadsheet_path, sheet_name,
 # File directory.
 files_path = r'D:\Users\User\Documents\PDF'
 spreadsheet_path = r'D:\Users\User\Documents\TRAZABILIDAD.xlsx'
+invalid_files_path = r'D:\Users\User\Documents\Archivos con formato inválido'
 patients_column = "D"
-study_column = "K"
-sheet_name = "Hoja1"
+study_column = "L"
+sheet = "Hoja1"
 
-check_files_in_report(spreadsheet_path, sheet_name, 
+check_files_in_report(spreadsheet_path, sheet, 
                       patients_column, study_column, 
-                      files_path)
+                      files_path, invalid_files_path)
