@@ -95,24 +95,19 @@ def check_files_in_report(spreadsheet_path, sheet,
     sheet = spreadsheet[sheet]
     green = '92d050'
 
-    #TEST
     for i in range(2, (len(sheet[patients_column]) + 1)):
         sheet_study = remove_accents(sheet[f'{study_column}{i}'].value)
         sheet_patient = remove_accents(sheet[f'{patients_column}{i}'].value)
-
-        # Normalizar o sanatizar datos.
         patient_info = f"{sheet_patient.strip()} _ {sheet_study.strip()}".lower()
         study_patients_sheet.append(patient_info)
-    # TEST
 
     files_in_report = set(study_patients_folder).intersection(set(study_patients_sheet))
     locale.setlocale(locale.LC_ALL, 'Spanish_Spain.1252')
     files_in_report = sorted(list(files_in_report), key=locale.strxfrm)
-
-    i = 0
-    j = 2
+    
     
     # Highlight patients cell who have PDF in folder. 
+    i, j = 0, 2
     while (i < len(files_in_report)) and (j < (len(sheet[patients_column]) + 1)):
         cell_study = remove_accents(sheet[f'{study_column}{j}'].value)
         cell_patient = remove_accents(sheet[f'{patients_column}{j}'].value)
@@ -128,7 +123,7 @@ def check_files_in_report(spreadsheet_path, sheet,
     try:
         spreadsheet.save(spreadsheet_path)
     except PermissionError:
-        print('The chages to the spreadsheet could not be saved because it is open \
+        print('The changes to the spreadsheet could not be saved because it is open \
               by another program!!!.\n')
 
     study_patients_dups_sheet = check_duplicate_items(study_patients_sheet)
